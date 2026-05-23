@@ -25,7 +25,19 @@ A nivel de software y tramas, este integrado emula exactamente el comportamiento
 
 MOSFETs de Canal P (AO4407A) de potencia. Su función exclusiva en este BMS es actuar como interruptores electrónicos (llaves de paso). Uno controla la línea de Carga y el otro la de Descarga
 
+### PinOut Pack
+
 ![alt text](imagen-4.png)
+
+Pinout de Conexión (Mapeo de la Serigrafía)
+- P+ / P+: Terminales del Positivo de Potencia (VCC). Ambos pines están puenteados en la placa para soportar la corriente de carga/descarga. Conecte aquí el cable positivo de su fuente o programador.
+- C: Línea de reloj del bus de datos, corresponde a SCL (Serial Clock). Conéctelo al pin SCL de su interfaz (EV2300/EV2400/Arduino).
+- D: Línea de datos del bus, corresponde a SDA (Serial Data). Conéctelo al pin SDA de su interfaz.
+- P-PRES: Pin de presencia de sistema (System Present / System Detect). Para que el chip BMS despierte y abra la comunicación SMBus fuera de la laptop, debe puentear este pin directamente a Masa/GND (P-) utilizando un cable corto o un puente de soldadura temporal.
+- ID: Pin de identificación de la batería (normalmente conectado a una resistencia interna térmica o de ID hacia masa). No suele requerirse para el flasheo básico.
+- P- / P-: Terminales del Negativo de Potencia / Masa (GND). Conecte aquí el cable de tierra de su analizador y el puente de P-PRES
+
+## Back de tarjeta BMS
 
 ![alt text](imagen-6.png)
 
