@@ -47,3 +47,60 @@ Regulador de voltaje LDO (Low-Dropout) de ultra-bajo consumo continuo
 ## Bateria
 
 ![alt text](imagen-2.png)
+
+# Arduino
+
+Programa pendiente en evaluar en equipo Arduino Nano + Display Matriz LCD
+
+```java
+#include <Wire.h>
+
+// Dirección estándar I2C para Smart Batteries (0x0B)
+#define BATTERY_ADDR 0x0B 
+
+// Comandos estándar SBS (Smart Battery Specification)
+#define CMD_VOLTAGE         0x09
+#define CMD_CURRENT         0x0A
+#define CMD_CHARGING_STATUS 0x15
+#define CMD_MANUFACTURER_ACCESS 0x00
+
+void setup() {
+  Wire.begin();        // Une al bus I2C como maestro
+  Serial.begin(9600);  // Abre el monitor serie
+  Serial.println("--- Buscando Batería Dell ---");
+}
+
+uint16_t readWord(uint8_t cmd) {
+  Wire.beginTransmission(BATTERY_ADDR);
+  Wire.write(cmd);
+  if (Wire.endTransmission(false) != 0) return 0xFFFF; // Error de conexión
+  
+  Wire.requestFrom(BATTERY_ADDR, 2);
+  if (Wire.available() == 2) {
+    uint8_t lowByte = Wire.read();
+    uint8_t highByte = Wire.read();
+    return (highByte << 8) | lowByte;
+  }
+  return 0xFFFF;
+}
+
+void loop() {
+  uint16_t voltage = readWord(CMD_VOLTAGE);
+  int16_t current = (int16_t)readWord(CMD_CURRENT);
+  uint16_t status = readWord(CMD_CHARGING_STATUS);
+
+  if (voltage == 0xFFFF) {
+    Serial.println("Error: Batería no detectada. Revisa conexiones o el puente P-PRES.");
+  } else {
+    Serial.print("Voltaje Total: "); Serial.print(voltage / 1000.0); Serial.println(" V");
+    Serial.print("Corriente: "); Serial.print(current); Serial.println(" mA");
+    Serial.print("Status Hex: 0x"); Serial.println(status, HEX);
+    
+    // Si los bits de alarma críticos están en 1, hay falla permanente
+    if (status & 0x4000) Serial.println("[ALERTA] TERMINATE_CHARGE_ALARM detectada.");
+    if (status & 0x0800) Serial.println("[ALERTA] TERMINATE_DISCHARGE_ALARM detectada (Celdas muertas).");
+  }
+  
+  delay(3000); // Muestreo cada 3 segundos
+}
+```
